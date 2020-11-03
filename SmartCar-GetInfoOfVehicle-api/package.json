@@ -1,0 +1,19 @@
+{
+  "name": "insertDocumentMaster",
+  "version": "1.0.0",
+  "main": "getStaticData.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "smartcar": "^7.6.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^6.4.0",
+    "aws-sdk": "^2.713.0"
+  },
+  "description": ""
+}
