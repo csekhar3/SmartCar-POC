@@ -1,0 +1,76 @@
+pipeline {
+   agent any
+
+environment {
+     GIT_URL = "git@paentgit01.aaa-acg.net:ACG/consumer-database.git"
+     GLOBAL_ID = "d2f0a910-ee4a-4449-8d6c-2a0381bd38a0"
+     API_NAME = "dgt-dss-InsertMakeAndModel-api"
+    }
+
+tools {
+        nodejs 'Node 12.18.1'
+    }
+    
+parameters { choice(name: 'ENVIRO', choices: ['dev', 'qa', 'stg', 'uat', 'prd'])
+             choice(name: 'GITBRANCH', choices: ['master', 'develop', 'release']) }
+
+options {
+    	skipDefaultCheckout(true)
+	}
+
+stages {
+    	stage('Git Checkout') {
+            steps {
+             checkout([$class: 'GitSCM', 
+                branches: [[name: "${GITBRANCH}"]],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [
+                [$class: 'SparseCheckoutPaths',  sparseCheckoutPaths:[[$class:'SparseCheckoutPath', path:"${API_NAME}"]]]
+                ],
+                submoduleCfg: [],
+                userRemoteConfigs: [[credentialsId: "${GLOBAL_ID}",
+                url: "${GIT_URL}"]]])
+            }
+        }
+    
+	    stage('Build') {
+            steps {
+                script {
+                currentBuild.displayName = "v1.0.0-${BUILD_NUMBER}"
+   		        echo "Environment : ${ENVIRO}"
+		        echo "Branch : ${GITBRANCH}"
+		        echo "Current Workspace : ${WORKSPACE}"
+		        dir ("${API_NAME}") {
+                        echo "Installing Dependencies"
+		                sh "npm install"
+		            }
+		        echo "Dependecies Installed - Build Completed"
+                }
+            }
+        }
+		
+       
+
+        stage('Deploy to AWS Lambda') {
+            steps {
+
+		            sh "pwd"
+                    dir ("${WORKSPACE}") {
+		                sh "chmod -R 755 ${env.API_NAME}"
+		            }
+
+                    
+		            dir ("${API_NAME}"){
+                        echo "Deployment started"
+		                sh "serverless deploy --stage ${ENVIRO} --aws-profile ${ENVIRO}-digital"
+		            }
+                echo "Deployment Completed"
+            }
+		}
+    }
+		post { 
+           always { 
+                cleanWs()
+            }
+        }
+}

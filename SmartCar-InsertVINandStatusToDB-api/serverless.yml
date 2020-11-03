@@ -1,0 +1,28 @@
+service: SmartCar-InsertVINandStatus-api
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-2
+  timeout: 30
+  role: arn:aws:iam::336210585422:role/digital-dev-lambda
+  deploymentBucket:
+    name: smartcar-poc
+  deploymentPrefix: Lambda
+  memorySize: 512
+
+
+#define the Lambda functions
+functions:
+  cb:
+    handler: insertVINandStatus.handler
+    description: Insert VIN and status.
+    name: smart-car-InsertVINandStatus-api
+    events:
+      - http: 
+          path: '/insertVINandStatus'
+          method: POST
+          cors: true
+plugins:
+  - serverless-offline
