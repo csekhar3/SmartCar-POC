@@ -1,0 +1,8 @@
+# package directories
+node_modules
+.dynamodb
+resources
+# Serverless directories
+.serverless
+package-lock.json
+*.lbs
